@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .button:active {
+            background-color: #3e8e41;
+        }
+
+        #video-container {
+            margin-top: 20px;
+            position: relative;
+            width: 100%;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+        }
+
+        #capture-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sign Up</h1>
+        <form method="post" enctype="multipart/form-data" id="signup-form">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <div id="video-container">
+                <video id="video" autoplay playsinline></video>
+                <button id="capture-btn" type="button">Capture Photo</button>
+            </div>
+            <img id="photo-preview" style="display: none;">
+            <input type="hidden" id="photo" name="photo" required>
+            <button type="submit" class="button">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureBtn = document.getElementById('capture-btn');
+        const photoInput = document.getElementById('photo');
+        const signupForm = document.getElementById('signup-form');
+
+        // Access user's camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+            })
+            .catch((error) => {
+                console.error('Error accessing camera: ', error);
+            });
+
+        // Capture photo from camera
+captureBtn.addEventListener('click', () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert photo to base64 and set as input value
+    const photoData = canvas.toDataURL('image/jpeg');
+    photoInput.value = photoData;
+
+    // Display the captured photo
+    const preview = document.getElementById('photo-preview');
+    preview.src = photoData;
+    preview.style.display = 'block';
+
+    // Stop video stream
+    video.srcObject.getTracks().forEach(track => track.stop());
+});
+
+
+
+        // Prevent form submission if photo is not captured
+        signupForm.addEventListener('submit', (event) => {
+            if (!photoInput.value) {
+                event.preventDefault();
+                alert('Please capture a photo.');
+            }
+        });
+    </script>
+</body>
+</html>
